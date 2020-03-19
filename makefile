@@ -1,29 +1,38 @@
 # **************************************************************************** #
 #                                                                              #
 #                                                         ::::::::             #
-#    ft_strlen.s                                        :+:    :+:             #
+#    makefile                                           :+:    :+:             #
 #                                                      +:+                     #
 #    By: robijnvanhouts <robijnvanhouts@student.      +#+                      #
 #                                                    +#+                       #
-#    Created: 2020/03/15 12:37:36 by robijnvanho    #+#    #+#                 #
-#    Updated: 2020/03/16 11:35:36 by robijnvanho   ########   odam.nl          #
+#    Created: 2020/03/18 15:14:28 by robijnvanho    #+#    #+#                 #
+#    Updated: 2020/03/19 13:16:16 by robijnvanho   ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
- section .text
+NAME = libasm.a
 
- global _ft_strlen
+NFLAGS = nasm -f macho64
 
- _ft_strlen:
-                xor     rax, rax            ; i = 0
-                jmp     compare
+SRC = 	ft_strlen.s ft_strcmp.s ft_strcpy.s ft_strdup.s \
+		ft_read.s ft_write.s \
 
-increment:      
-                inc     rax                 ; i++
+OBJ = $(SRC:.s=.o)
 
-compare:
-                cmp     BYTE[rdi + rax], 0  ; str[i] == 0
-                jne     increment           ; jump to i++
+all: $(NAME)
 
-done:
-                ret                         ; return i
+$(NAME): $(OBJ)
+	ar rcs $(NAME) $^
+	ranlib $(NAME)
+
+%.o: %.s
+	$(NA) $(NFLAGS) $<
+
+clean:
+	rm -f $(OBJ)
+	rm -f ./exec
+
+fclean: clean
+	rm -f $(NAME)
+
+re: fclean all

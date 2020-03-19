@@ -6,57 +6,33 @@
 #    By: robijnvanhouts <robijnvanhouts@student.      +#+                      #
 #                                                    +#+                       #
 #    Created: 2020/03/15 13:10:12 by robijnvanho    #+#    #+#                 #
-#    Updated: 2020/03/15 13:31:49 by robijnvanho   ########   odam.nl          #
+#    Updated: 2020/03/19 13:13:52 by robijnvanho   ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
- global _ft_strdup
-
  section .text
 
+ global _ft_strdup
+ extern _malloc
+ extern _ft_strlen
+ extern _ft_strcpy
+
  _ft_strdup:
-                cmp     rdi, 0              ;check if src != 0
-                jz      error               ;return if true
+                push     rdi                ; set to stack
+                call     _ft_strlen         ; get length for malloc
+                inc      rax                ; increase once for \0
+                mov      rdi, rax           ; store value in rdi
                 
-get_length:
-                xor     rcx, rcx            ;set to zero
-                jmp     compare_length      ;start counting length
-
-increment_length:
-                inc     rcx                 ;increment variable
-
-compare_length:
-                cmp     BYTE[rdi + rcx], 0  ;check if zero
-                jne     increment_length    ;if not, increment variable
-
-start_malloc:
-                inc     rcx                 ;allocate 1 extra for \0
+                call    _malloc             ; malloc rax amount
+                pop     rdi                 ; get rdi from stack
+                cmp     rax, 0              ; check malloc
+                jz      write_error         ; malloc fail
                 
-                push    rdi                 ;writing value to stack to save increment
-                mov     rdi, rcx            ;rdi becomes value rcx
-                call    _malloc             ;malloc length and saved in rax
-                pop     rdi                 ;restore first thing on stack, so rdi
-                cmp     rax, 0              ;check if new str/rax is 0
-                jz      error               ;check for malloc fail
+                mov     rsi, rdi            ; store value in rsi
+                mov     rdi, rax            ; store value in rdi
+                call    _ft_strcpy          ; place str in new str
+                ret                         ; return
 
-start_copy:
-                xor     rcx, rcx            ;set to zero
-                xor     rdx, rdx            ;set to zero
-                jmp     while_copy          ;start copying src in new str
-
-increment_copy:
-                inc     rcx                 ;increment value to loop through str
-
-while_copy:
-                mov     dl, BYTE[rdi + rcx] ;move char src in dl
-                mov     BYTE[rax + rcx], dl ;move dl to char dst
-                cmp     dl, 0               ;check if end of str
-                jnz     increment_copy      ;increment to go to next char if zero not yet reached
-                jmp     return              ;zero is reached so return
-
-error:
-                xor     rax, rax            ;return 0
-
-return:
-                ret                         ;return rax
-                
+write_error:
+                mov     rax, 0              ; return 0 if malloc fail
+                ret
