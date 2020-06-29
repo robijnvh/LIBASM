@@ -1,12 +1,12 @@
 # **************************************************************************** #
 #                                                                              #
-#                                                         ::::::::             #
-#    ft_strdup.s                                        :+:    :+:             #
-#                                                      +:+                     #
-#    By: robijnvanhouts <robijnvanhouts@student.      +#+                      #
-#                                                    +#+                       #
-#    Created: 2020/03/15 13:10:12 by robijnvanho    #+#    #+#                 #
-#    Updated: 2020/03/19 13:13:52 by robijnvanho   ########   odam.nl          #
+#                                                         :::      ::::::::    #
+#    ft_strdup.s                                        :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: rvan-hou <rvan-hou@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2020/03/15 13:10:12 by robijnvanho       #+#    #+#              #
+#    Updated: 2020/06/29 12:14:15 by rvan-hou         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,20 +19,28 @@
 
  _ft_strdup:
                 push     rdi                ; set to stack
+				cmp		 rdi, 0				; check
+				je		 error
+				mov		 rcx, 0				; index cnt
                 call     _ft_strlen         ; get length for malloc
                 inc      rax                ; increase once for \0
                 mov      rdi, rax           ; store value in rdi
                 
+				push	rbp					; safe base ptr
+				mov		rbp, rsp
+				and		rsp, - 16			; allign stack
                 call    _malloc             ; malloc rax amount
-                pop     rdi                 ; get rdi from stack
+				mov		rsp, rbp			; reset stack and base ptr
+                pop     rbp
                 cmp     rax, 0              ; check malloc
-                jz      write_error         ; malloc fail
-                
-                mov     rsi, rdi            ; store value in rsi
-                mov     rdi, rax            ; store value in rdi
-                call    _ft_strcpy          ; place str in new str
-                ret                         ; return
+                je      error         		; malloc fail
 
-write_error:
-                mov     rax, 0              ; return 0 if malloc fail
+copy:
+				pop		rsi					; og str as src
+				mov		rdi, rax			; alloc as dst
+				call	_ft_strcpy
+				ret
+
+error:
+                pop		rdi
                 ret
